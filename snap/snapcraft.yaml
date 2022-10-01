@@ -1,0 +1,84 @@
+name: spiderfoot
+base: core20
+adopt-info: spiderfoot
+summary: SpiderFoot is an open source intelligence (OSINT) automation tool.
+description: |
+  SpiderFoot is an open source intelligence (OSINT) automation tool. It integrates with just about every data source available and utilises a range of methods for data analysis, making that data easy to navigate.
+
+  SpiderFoot has an embedded web-server for providing a clean and intuitive web-based interface but can also be used completely via the command-line.
+
+  **FEATURES**
+
+    * Web based UI or CLI
+    * Over 200 modules (see below)
+    * Python 3.7+
+    * YAML-configurable correlation engine with 37 pre-defined rules
+    * CSV/JSON/GEXF export
+    * API key export/import
+    * SQLite back-end for custom querying
+    * Highly configurable
+    * Fully documented
+    * Visualisations
+    * TOR integration for dark web searching
+    * Dockerfile for Docker-based deployments
+    * Can call other tools like DNSTwist, Whatweb, Nmap and CMSeeK
+
+  Documentation:- https://www.spiderfoot.net/documentation
+
+  Asciinema videos:- https://asciinema.org/~spiderfoot
+
+grade: stable
+confinement: strict
+compression: lzo
+
+icon: sf.png
+
+apps:
+  spiderfoot:
+    command: bin/snapcraft-preload $SNAP/SpiderFoot
+    plugs: [home, network, network-bind]
+
+  cli:
+    command: sfcli.py
+    plugs: [home, network, network-bind]
+
+parts:
+  snapcraft-preload:
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    build-packages:
+      - on amd64:
+        - gcc-multilib
+        - g++-multilib
+
+  spiderfoot:
+    after: [snapcraft-preload]
+    plugin: python
+    source: https://github.com/smicallef/spiderfoot.git
+    requirements: [./requirements.txt]
+    build-packages:
+      - libxml2-dev
+      - libxslt1-dev
+      - libffi-dev
+      - libssl-dev
+      - libjpeg-dev
+      - rustc
+      - cargo
+
+    override-build: |
+      snapcraftctl build
+      rm *ocker* *.md *.txt
+      sed -i 's#consider adding authentication to protect this instance!#add passwd file in $HOME/snap/spiderfoot/current/.spiderfoot#g' sf.py
+      cp sf.py SpiderFoot
+      cp -r ./* $SNAPCRAFT_PART_INSTALL/
+      snapcraftctl set-version $(git describe)
+
+    override-prime: |
+      snapcraftctl prime
+      mv usr/local/bin/snapcraft-preload bin/
+      mv usr/local/lib/lib* lib/
+
+    prime:
+      - -share/python-wheels
+      - -lib/python3.8/site-packages/pip*
+      - -lib/python3.8/site-packages/setuptools*
