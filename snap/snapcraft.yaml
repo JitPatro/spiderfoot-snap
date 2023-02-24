@@ -50,6 +50,37 @@ apps:
     plugs: [home, network, network-bind]
 
 parts:
+
+  dnstwist:
+    source: https://github.com/elceef/dnstwist.git
+    plugin: python
+
+    override-build: |
+      snapcraftctl build
+      find $SNAPCRAFT_PART_INSTALL/ -name "*.pyc" -exec rm -rf {} +
+
+    stage:
+      - -bin/activate*
+      - -lib/python3.8/site-packages/wheel*
+      - -lib/python3.8/site-packages/pip*
+      - -lib/python3.8/site-packages/setuptools*
+      - -pyvenv.cfg
+
+  nmap:
+    after: [dnstwist]
+    source: https://nmap.org/dist/nmap-7.93.tgz
+    plugin: autotools
+    autotools-configure-parameters:
+      - --enable-static
+      - --disable-shared
+      - --prefix=${SNAPCRAFT_PART_INSTALL}
+      - --without-zenmap
+      - --without-ncat
+    build-packages:
+      - libssl-dev
+      - libpcre3-dev
+      - libpcap-dev
+
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
     plugin: cmake
@@ -57,7 +88,7 @@ parts:
       - on amd64:
         - gcc-multilib
         - g++-multilib
-
+        
   spiderfoot:
     after: [snapcraft-preload]
     plugin: python
