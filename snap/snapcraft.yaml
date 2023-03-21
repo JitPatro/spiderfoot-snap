@@ -70,12 +70,12 @@ parts:
     after: [dnstwist]
     source: https://nmap.org/dist/nmap-7.93.tgz
     plugin: make
-    build-packages: [build-essential, libssl-dev]
+    build-packages: [build-essential, libssl-dev, upx-ucl]
 
     override-build: |
       ./configure --with-libpcap=included --with-libpcre=included
       make static
-      strip ./nmap
+      strip ./nmap; upx -9 ./nmap
       mkdir $SNAPCRAFT_PART_INSTALL/bin
       cp ./nmap $SNAPCRAFT_PART_INSTALL/bin/
 
