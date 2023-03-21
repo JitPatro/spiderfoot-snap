@@ -70,9 +70,7 @@ parts:
     after: [dnstwist]
     source: https://nmap.org/dist/nmap-7.93.tgz
     plugin: make
-    build-packages:
-      - on [amd64,arm64,armhf,ppc64el]: [build-essential, libssl-dev, upx-ucl]
-      - else: [build-essential, libssl-dev]
+    build-packages: [build-essential, libssl-dev, upx-ucl]
 
     override-build: |
       ./configure --with-libpcap=included --with-libpcre=included
