@@ -1,5 +1,5 @@
 name: spiderfoot
-base: core20
+base: core22
 adopt-info: spiderfoot
 summary: SpiderFoot is an open source intelligence (OSINT) automation tool.
 description: |
@@ -56,29 +56,28 @@ parts:
     plugin: python
 
     override-build: |
-      snapcraftctl build
-      find $SNAPCRAFT_PART_INSTALL/ -name "*.pyc" -exec rm -rf {} +
+      craftctl default
+      find $CRAFT_PART_INSTALL/ -name "*.pyc" -exec rm -rf {} +
 
     stage:
       - -bin/activate*
-      - -lib/python3.8/site-packages/wheel*
-      - -lib/python3.8/site-packages/pip*
-      - -lib/python3.8/site-packages/setuptools*
+      - -lib/python3.10/site-packages/wheel*
+      - -lib/python3.10/site-packages/pip*
+      - -lib/python3.10/site-packages/setuptools*
       - -pyvenv.cfg
 
   nmap:
     after: [dnstwist]
     source: https://nmap.org/dist/nmap-7.93.tgz
-    plugin: autotools
-    autotools-configure-parameters:
-      - --enable-static
-      - --disable-shared
-      - --without-zenmap
-      - --without-ncat
-    build-packages:
-      - libssl-dev
-      - libpcre3-dev
-      - libpcap-dev
+    plugin: make
+    build-packages: [build-essential, libssl-dev]
+
+    override-build: |
+      ./configure --with-libpcap=included --with-libpcre=included
+      make static
+      strip ./nmap
+      mkdir $SNAPCRAFT_PART_INSTALL/bin
+      cp ./nmap $SNAPCRAFT_PART_INSTALL/bin/
 
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
@@ -92,7 +91,6 @@ parts:
     after: [snapcraft-preload]
     plugin: python
     source: https://github.com/smicallef/spiderfoot.git
-    requirements: [./requirements.txt]
     build-packages:
       - libxml2-dev
       - libxslt1-dev
@@ -103,12 +101,13 @@ parts:
       - cargo
 
     override-build: |
-      snapcraftctl build
+      craftctl default
+      pip install -r requirements.txt
       rm *ocker* *.md *.txt
       sed -i 's#consider adding authentication to protect this instance!#add passwd file in $HOME/snap/spiderfoot/current/.spiderfoot#g' sf.py
       cp sf.py SpiderFoot
-      cp -r ./* $SNAPCRAFT_PART_INSTALL/
-      snapcraftctl set-version $(git describe)
+      cp -r ./* $CRAFT_PART_INSTALL/
+      craftctl set version=$(git describe)
 
     override-prime: |
       snapcraftctl prime
@@ -117,5 +116,5 @@ parts:
 
     prime:
       - -share/python-wheels
-      - -lib/python3.8/site-packages/pip*
-      - -lib/python3.8/site-packages/setuptools*
+      - -lib/python3.10/site-packages/pip*
+      - -lib/python3.10/site-packages/setuptools*
