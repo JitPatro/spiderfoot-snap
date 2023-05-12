@@ -75,7 +75,8 @@ parts:
     override-build: |
       ./configure --with-libpcap=included --with-libpcre=included
       make static
-      strip ./nmap; upx -9 ./nmap
+      strip ./nmap 
+      if [ $(uname -p) != s390x ]; then upx -9 ./nmap; fi
       mkdir $SNAPCRAFT_PART_INSTALL/bin
       cp ./nmap $SNAPCRAFT_PART_INSTALL/bin/
 
