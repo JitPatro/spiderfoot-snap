@@ -26,6 +26,12 @@ description: |
   Documentation:- https://www.spiderfoot.net/documentation
 
   Asciinema videos:- https://asciinema.org/~spiderfoot
+  
+  To use `nmap` in SpiderFoot, you've to manually connect two interfaces with the following commands:-
+  
+  `snap connect spiderfoot:nmap nmap:nmap`
+  
+  `snap connect nmap:network-control`
 
 grade: stable
 confinement: strict
@@ -33,21 +39,34 @@ confinement: strict
 
 icon: sf.png
 
+environment:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+  LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas
+
+plugs:
+  nmap:
+    interface: content
+    target: $SNAP
+    default-provider: nmap
+    
 architectures:
   - build-on: amd64
   - build-on: arm64
   - build-on: armhf
   - build-on: ppc64el
   - build-on: s390x
-    
+
+
 apps:
   spiderfoot:
     command: bin/snapcraft-preload $SNAP/SpiderFoot
     plugs: [home, network, network-bind]
 
   cli:
-    command: sfcli.py
+    command: bin/snapcraft-preload sfcli.py
     plugs: [home, network, network-bind]
+
 
 parts:
 
@@ -65,20 +84,6 @@ parts:
       - -lib/python3.10/site-packages/pip*
       - -lib/python3.10/site-packages/setuptools*
       - -pyvenv.cfg
-
-  nmap:
-    after: [dnstwist]
-    source: https://nmap.org/dist/nmap-7.93.tgz
-    plugin: make
-    build-packages: [build-essential, libssl-dev, upx-ucl]
-
-    override-build: |
-      ./configure --with-libpcap=included --with-libpcre=included
-      make static
-      strip ./nmap 
-      if [ $(uname -p) != s390x ]; then upx -9 ./nmap; fi
-      mkdir $SNAPCRAFT_PART_INSTALL/bin
-      cp ./nmap $SNAPCRAFT_PART_INSTALL/bin/
 
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
@@ -114,6 +119,7 @@ parts:
       snapcraftctl prime
       mv usr/local/bin/snapcraft-preload bin/
       mv usr/local/lib/lib* lib/
+      rm -rf usr/
 
     prime:
       - -share/python-wheels
