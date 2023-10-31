@@ -116,7 +116,7 @@ parts:
       craftctl set version=$(git describe)
 
     override-prime: |
-      snapcraftctl prime
+      craftctl default
       mv usr/local/bin/snapcraft-preload bin/
       mv usr/local/lib/lib* lib/
       rm -rf usr/
