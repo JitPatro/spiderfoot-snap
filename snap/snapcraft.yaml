@@ -64,7 +64,7 @@ apps:
     plugs: [home, network, network-bind]
 
   cli:
-    command: bin/snapcraft-preload sfcli.py
+    command: bin/snapcraft-preload $SNAP/sfcli.py
     plugs: [home, network, network-bind]
 
 
