@@ -111,7 +111,7 @@ parts:
       pip install -r requirements.txt
       rm *ocker* *.md *.txt
       sed -i 's#consider adding authentication to protect this instance!#add passwd file in $HOME/snap/spiderfoot/current/.spiderfoot#g' sf.py
-      cp sf.py SpiderFoot
+      cp sf.py SpiderFoot; chmod +x ./SpiderFoot
       cp -r ./* $CRAFT_PART_INSTALL/
       craftctl set version=$(git describe)
 
