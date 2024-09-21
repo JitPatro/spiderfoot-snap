@@ -1,5 +1,5 @@
 name: spiderfoot
-base: core22
+base: core24
 adopt-info: spiderfoot
 summary: SpiderFoot is an open source intelligence (OSINT) automation tool.
 description: |
@@ -49,14 +49,18 @@ plugs:
     interface: content
     target: $SNAP
     default-provider: nmap
-    
-architectures:
-  - build-on: amd64
-  - build-on: arm64
-  - build-on: armhf
-  - build-on: ppc64el
-  - build-on: s390x
 
+platforms:
+  amd64:
+    build-on: [amd64]
+  arm64:
+    build-on: [arm64]
+  armhf:
+    build-on: [armhf]
+  ppc64el:
+    build-on: [ppc64el]
+  s390x:
+    build-on: [s390x]
 
 apps:
   spiderfoot:
@@ -80,9 +84,9 @@ parts:
 
     stage:
       - -bin/activate*
-      - -lib/python3.10/site-packages/wheel*
-      - -lib/python3.10/site-packages/pip*
-      - -lib/python3.10/site-packages/setuptools*
+      - -lib/python3.12/site-packages/wheel*
+      - -lib/python3.12/site-packages/pip*
+      - -lib/python3.12/site-packages/setuptools*
       - -pyvenv.cfg
 
   snapcraft-preload:
@@ -92,7 +96,7 @@ parts:
       - on amd64:
         - gcc-multilib
         - g++-multilib
-        
+
   spiderfoot:
     after: [snapcraft-preload]
     plugin: python
@@ -123,5 +127,5 @@ parts:
 
     prime:
       - -share/python-wheels
-      - -lib/python3.10/site-packages/pip*
-      - -lib/python3.10/site-packages/setuptools*
+      - -lib/python3.12/site-packages/pip*
+      - -lib/python3.12/site-packages/setuptools*
